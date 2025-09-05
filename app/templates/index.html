@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小蜜蜂大乐堂</title>
+
+
+    <link rel="icon" href="static/favicon.png" type="image/x-icon">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f2f5;
+            /* 更柔和的浅灰背景 */
+            color: #333;
+            /* 深灰文字，增强可读性 */
+        }
+
+        .player-container {
+            background-color: #ffffff;
+            /* 纯白卡片 */
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            /* 轻微阴影 */
+            border: 1px solid #e0e4e8;
+            /* 细微边框 */
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            /* 允许换行 */
+            gap: 10px;
+            /* 控件之间的间距 */
+            justify-content: center;
+            /* 居中排列 */
+            margin-top: 15px;
+        }
+
+        .controls button,
+        .controls select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+
+        button {
+            padding: 10px 18px;
+            background-color: #5ab9ea;
+            /* 柔和湖水蓝 */
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+
+
+        button:hover {
+            background-color: #489fcc;
+            /* 深一阶的点缀色 */
+        }
+
+        .author-btn {
+            background-color: #f29e4c;
+            /* 暖橙色作为次要操作色 */
+        }
+
+        .author-btn:hover {
+            background-color: #d3863a;
+        }
+
+        .song-info {
+            margin: 24px 0;
+            padding: 16px;
+            background-color: #fafafb;
+            /* 极浅的灰白 */
+            border-radius: 6px;
+            border: 1px solid #e5e8eb;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        .ripple-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: black;
+            z-index: 9997;
+            pointer-events: none;
+            transition: opacity 0.2s ease, filter 0.2s ease;
+        }
+
+        .spectrum-container {
+            margin: 24px auto 0 auto;
+            max-width: 900px;
+            background: linear-gradient(180deg, #ffd8b0, #ffb685, #ff9f6a);
+            /* 温暖橙色渐变 */
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        #spectrumCanvas {
+            display: block;
+            width: 100%;
+            height: 260px;
+            border-radius: 8px;
+            background-color: #fff8f0;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="player-container">
+        <h1>🎵 小蜜蜂大乐堂 🐝</h1>
+
+        <div class="song-info">
+            <h2 id="current-song">当前未播放</h2>
+            <audio id="audio-player" controls></audio>
+        </div>
+
+        <div class="controls">
+            <button id="play-btn">随便听听</button>
+            <button id="prev-btn">上一首</button>
+            <button id="toggleSpectrumBtn">显示频谱</button>
+
+            <label for="play-mode"></label><select id="play-mode">
+                <option value="random">连播模式：随机播放</option>
+                <option value="loop-list">连播模式：列表循环</option>
+                <option value="single-loop">连播模式：单曲循环</option>
+            </select>
+
+            <label for="folder-selector"></label><select id="folder-selector">
+                <option value="dian_gun">溜冰密室</option>
+                <option value="da_si_ma">起飞基地</option>
+                <option value="ding_zhen">烟雾缭绕</option>
+                <option value="dxl">东洋雪莲</option>
+                <option value="ha_ji_mi">哈基咪咪</option>
+            </select>
+
+            <button class="author-btn" onclick="window.open('https://github.com/HarvestMoons/HarvestMoons', '_blank')">
+                开发者信息
+            </button>
+        </div>
+
+    </div>
+
+    <!-- 🎨 单独的频谱容器 -->
+    <div class="spectrum-container">
+        <canvas id="spectrumCanvas"></canvas>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'http://8.155.47.138:8081';
+        const defaultFolder = 'dian_gun';
+        const audioPlayer = document.getElementById('audio-player');
+        const currentSongEl = document.getElementById('current-song');
+        const playBtn = document.getElementById('play-btn');
+        const playModeSelect = document.getElementById('play-mode');
+        const folderSelector = document.getElementById('folder-selector');
+        const headers = {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST,PATCH,OPTIONS'
+        }
+
+        let playlist = [];  // 随机初始化的播放列表
+        let currentIndex = -1;
+        let currentFolder = folderSelector.value;
+
+        folderSelector.addEventListener('change', async () => {
+            const selectedFolder = folderSelector.value;
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/set-folder`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ folder: selectedFolder })
+                });
+                const result = await res.json();
+                if (result.status === 'ok') {
+                    currentFolder = selectedFolder;
+                    historyStack.length = 0; // <<< 清空回退历史
+                    const newList = await fetchSongList();  // 重新拉取新目录下的歌曲
+
+                    if (newList.length > 0) {
+                        playSongAtIndex(0);
+                    } else {
+                        currentSongEl.textContent = '无可播放歌曲';
+                        audioPlayer.src = '';
+                    }
+                } else {
+                    alert('切换失败：' + result.error);
+                }
+            } catch (e) {
+                console.error('切换音乐文件夹失败', e);
+                alert('请求失败');
+            }
+        });
+
+        // 获取所有歌曲列表
+        async function fetchSongList() {
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/songs`);
+                const data = await res.json();
+                playlist = shuffleArray(data);  // 初始化为打乱后的列表
+                historyStack.length = 0; // <<< 清空回退历史
+                console.log(playlist[0])
+                return playlist;
+
+            } catch (e) {
+                console.error("获取歌曲列表失败", e);
+                return [];
+            }
+        }
+
+        // 随机打乱数组
+        function shuffleArray(array) {
+            return array.slice().sort(() => Math.random() - 0.5);
+        }
+
+        window.addEventListener('DOMContentLoaded', async function () {
+            // 设置 currentFolder 为默认值"dian_gun"
+            // 强制切换到默认文件夹 'dian_gun'
+            // 设置默认文件夹为 'dian_gun'
+            folderSelector.value = defaultFolder;
+            currentFolder = defaultFolder;
+            // 通知后端切换目录
+            const res = await fetch(`${BACKEND_URL}/api/set-folder`, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ folder: defaultFolder })
+            });
+            await fetchSongList();
+
+            // 设置默认音量为 30%
+            audioPlayer.volume = 0.3;
+            const script = document.createElement('script');
+            script.src = '/static/js/background-particles.js';
+            script.setAttribute('zIndex', '0');
+            script.setAttribute('opacity', '0.4');
+            script.setAttribute('color', '0,0,0');
+            script.setAttribute('count', '99');
+            document.body.appendChild(script);
+        });
+
+        function parseSongNameWithBv(songName) {
+            const name = songName.replace(/\.mp3$/, '');
+            const match = name.match(/^(.*?)_?(BV[0-9A-Za-z]+)/);
+            if (match) {
+                return {
+                    title: match[1],
+                    bv: match[2]
+                };
+            }
+            return {
+                title: name,
+                bv: null
+            };
+        }
+
+
+        let historyStack = []; // 播放历史栈
+
+        function playSongAtIndex(index, { fromHistory = false } = {}) {
+            if (index < 0 || index >= playlist.length) {
+                currentSongEl.textContent = '播放失败：索引越界';
+                return;
+            }
+
+            // 仅当不是来源于回退，且确实切换到不同索引时才入栈
+            if (!fromHistory && currentIndex !== -1 && currentIndex !== index) {
+                historyStack.push(currentIndex);
+            }
+
+            currentIndex = index;
+            const name = playlist[index];
+            audioPlayer.src = `${BACKEND_URL}/music/${encodeURIComponent(currentFolder)}/${encodeURIComponent(name)}`;
+            const parsed = parseSongNameWithBv(name);
+            if (parsed.bv) {
+                currentSongEl.innerHTML = `${parsed.title} <a href="https://www.bilibili.com/video/${parsed.bv}/" target="_blank" style="font-size:14px;color:#007bff;">[叽里咕噜说啥呢]</a>`;
+            } else {
+                currentSongEl.textContent = parsed.title;
+            }
+            audioPlayer.play();
+        }
+
+
+        function playPreviousSong() {
+            if (historyStack.length === 0) {
+                alert("没有上一首了！");
+                return;
+            }
+            const prevIndex = historyStack.pop();
+            playSongAtIndex(prevIndex, { fromHistory: true });
+        }
+
+        document.getElementById('prev-btn').addEventListener('click', playPreviousSong);
+
+
+        // 根据播放模式处理“下一首”
+        function handlePlaybackEnd() {
+            const mode = playModeSelect.value;
+            if (mode === 'single-loop') {
+                audioPlayer.currentTime = 0;
+                audioPlayer.play();
+            } else if (mode === 'loop-list') {
+                const nextIndex = (currentIndex + 1) % playlist.length;
+                playSongAtIndex(nextIndex);
+            } else {
+                playRandomSong();
+            }
+        }
+
+        audioPlayer.addEventListener('error', () => {
+            const failedSong = playlist[currentIndex];
+            console.warn(`❌ 无法播放：${decodeURIComponent(failedSong)}，尝试下一首(currentIndex:${currentIndex})`);
+
+            setTimeout(() => {
+                const mode = playModeSelect.value;
+                if (mode === 'loop-list') {
+                    const nextIndex = (currentIndex + 1) % playlist.length;
+                    playSongAtIndex(nextIndex);
+                } else {
+                    playRandomSong();
+                }
+            }, 1000); // 延迟 1000 毫秒，即 1 秒
+        });
+
+        // 获取并播放一首随机歌曲（前端本地选择，不请求后端）
+        function playRandomSong() {
+            if (!playlist || playlist.length === 0) {
+                console.error('播放失败：歌曲列表为空');
+                currentSongEl.textContent = '播放失败：歌曲列表为空';
+                return;
+            }
+
+            const randomIndex = Math.floor(Math.random() * playlist.length);
+            playSongAtIndex(randomIndex);
+        }
+
+        async function initAndPlay(reload = true) {
+            if (reload || playlist.length === 0) {
+                const res = await fetch(`${BACKEND_URL}/api/songs`);
+                const data = await res.json();
+                playlist = shuffleArray(data);
+            }
+            const randomIndex = Math.floor(Math.random() * playlist.length);
+            playSongAtIndex(randomIndex);
+        }
+
+        audioPlayer.addEventListener("ended", function () {
+            const diff = Math.abs(audioPlayer.currentTime - audioPlayer.duration);
+
+            if (audioPlayer.duration > 0 && diff < 0.5) {
+                console.log("音频播放真正完成。");
+                handlePlaybackEnd();
+            } else {
+                console.warn("ended 事件被误触发，忽略。");
+            }
+        });
+
+
+        playBtn.addEventListener('click', () => {
+            const mode = playModeSelect.value;
+            if (mode === 'loop-list') {
+                initAndPlay(false);  // 不打乱，保留当前 playlist
+            } else {
+                playRandomSong();
+            }
+        });
+
+        function stopAudio() {
+            // 停止当前音乐
+            if (audioPlayer) {
+                audioPlayer.pause();
+            }
+        }
+    </script>
+    <script src="/static/js/ripple.js"></script>
+    <script src="/static/js/spectrum-visualizer.js"></script>
+
+</body>
+
+</html>

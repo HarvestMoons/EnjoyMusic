@@ -1,0 +1,23 @@
+services:
+  flask:
+    build:
+      context: ./app
+    container_name: flask_app
+    restart: always
+    volumes:
+      - ./app/templates:/app/templates
+    expose:
+      - "5000"
+
+  nginx:
+    image: nginx:stable
+    container_name: nginx_frontend
+    restart: always
+    ports:
+      - "8081:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./app/music:/app/music
+      - ./app/static:/app/static
+    depends_on:
+      - flask
