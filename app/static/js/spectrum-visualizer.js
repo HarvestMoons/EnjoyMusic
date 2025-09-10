@@ -20,7 +20,7 @@
 
     source.connect(analyser);
     analyser.connect(audioCtx.destination);
-    canvas.style.display="none"
+    canvas.style.display = "none"
     btn.addEventListener("click", () => {
         showSpectrum = !showSpectrum;
         btn.textContent = showSpectrum ? "隐藏频谱" : "显示频谱";
@@ -29,9 +29,9 @@
 
     // 公共渐变色
     const gradientColors = [
-        { stop: 0, color: "rgba(255,200,180,0.8)" },
-        { stop: 0.5, color: "rgba(255,180,150,0.7)" },
-        { stop: 1, color: "rgba(255,160,120,0.6)" },
+        {stop: 0, color: "rgba(255,200,180,0.8)"},
+        {stop: 0.5, color: "rgba(255,180,150,0.7)"},
+        {stop: 1, color: "rgba(255,160,120,0.6)"},
     ];
 
     function getGradient(x1, y1, x2, y2) {
