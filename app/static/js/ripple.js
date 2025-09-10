@@ -7,7 +7,7 @@ let videoElement = null;
 let clickCount = 0;
 
 document.addEventListener("mousedown", function (e) {
-    if (e.button !== 0||videoElement || e.target.closest("button, select, a, input, textarea, label")) {
+    if (e.button !== 0 || videoElement || e.target.closest("button, select, a, input, textarea, label")) {
         return;
     }
 
@@ -66,16 +66,16 @@ function playFullScreenVideo() {
     videoElement = document.createElement("video");
     videoElement.src = "static/secret/惊天♂魔盗团.mp4";
     Object.assign(videoElement.style, {
-        position:      "fixed",
-        top:           "0",
-        left:          "0",
-        width:         "100vw",
-        height:        "100vh",
-        objectFit:     "cover",
+        position: "fixed",
+        top: "0",
+        left: "0",
+        width: "100vw",
+        height: "100vh",
+        objectFit: "cover",
         pointerEvents: "none"
     });
     videoElement.autoplay = true;
-    videoElement.loop     = false;
+    videoElement.loop = false;
 
     videoElement.addEventListener("playing", () => {
         if (overlay) {
@@ -97,6 +97,7 @@ function playFullScreenVideo() {
             document.removeEventListener("click", onVideoClick);
         }
     }
+
     document.addEventListener("click", onVideoClick);
 }
 

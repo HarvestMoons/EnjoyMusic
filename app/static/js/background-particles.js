@@ -89,11 +89,11 @@
 
     // 设置 canvas 样式并添加到页面
     canvas.id = "canvas_background_" + config.scriptCount;
-    canvas.style.cssText = `position:fixed;top:0;left:0;z-index:${config.zIndex};opacity:${config.opacity}`+";pointer-events:none;";
+    canvas.style.cssText = `position:fixed;top:0;left:0;z-index:${config.zIndex};opacity:${config.opacity}` + ";pointer-events:none;";
     document.body.appendChild(canvas);
 
     // 鼠标点对象
-    const mouse = { x: null, y: null, max: 20000 };
+    const mouse = {x: null, y: null, max: 20000};
 
     // 初始化粒子数组
     const particles = [];
@@ -102,7 +102,7 @@
         const y = Math.random() * height;
         const vx = (Math.random() * 2 - 1);
         const vy = (Math.random() * 2 - 1);
-        particles.push({ x, y, vx, vy, max: 6000 });
+        particles.push({x, y, vx, vy, max: 6000});
     }
 
     // 所有参与计算的对象：粒子 + 鼠标点
