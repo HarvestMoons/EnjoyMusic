@@ -5,13 +5,14 @@ import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.OSSObjectSummary;
 import com.aliyun.oss.model.ObjectListing;
 import com.example.musicplayer.model.Song;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnThreading;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class SongService {
@@ -21,14 +22,14 @@ public class SongService {
     private final String bucketName = "bees-bucket";
 
     private final Map<String, String> AVAILABLE_FOLDERS = Map.of(
+            "ha_ji_mi", "哈基米",
             "dian_gun", "溜冰场",
             "da_si_ma", "大司马",
             "ding_zhen", "丁真",
-            "dxl", "东洋雪莲",
-            "ha_ji_mi", "哈基米"
+            "dxl", "东洋雪莲"
     );
 
-    private String currentFolderKey = "dian_gun";
+    private String currentFolderKey = "ha_ji_mi";
 
     public SongService(
             StringRedisTemplate redisTemplate,
@@ -41,7 +42,6 @@ public class SongService {
 
     // 获取歌曲列表
     public List<Song> getSongs() {
-        System.out.println("Redis连接状态: " + (redisTemplate.getConnectionFactory() != null ? "已连接" : "未连接"));
         String folder = AVAILABLE_FOLDERS.get(currentFolderKey);
         String prefix = "music/" + folder + "/";
         ObjectListing objectListing = ossClient.listObjects(bucketName, prefix);
