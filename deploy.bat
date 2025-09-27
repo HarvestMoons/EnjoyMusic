@@ -1,8 +1,10 @@
-
 @echo off
 chcp 65001 >nul
 echo === Docker镜像推送脚本 ===
 
+:: --------------------------
+:: 1. 登录 Docker Hub
+:: --------------------------
 echo.
 echo 1. 登录Docker Hub...
 docker login
@@ -12,34 +14,55 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-echo.
-echo 2. 给镜像打标签...
-set local_image=ice-spring:latest
-set remote_image=beecool/music-player:latest
+:: --------------------------
+:: 2. 定义镜像变量
+:: --------------------------
+set backend_local=ice-spring:latest
+set backend_remote=beecool/music-player:latest
 
-:: 检查本地镜像是否存在
+set frontend_local=ice-frontend:latest
+set frontend_remote=beecool/music-player-frontend:latest
+
+:: --------------------------
+:: 3. 推送后端镜像
+:: --------------------------
+echo.
+echo 2. 推送后端镜像...
 docker images | findstr "ice-spring" >nul
 if %errorlevel% neq 0 (
-    echo 错误: 本地镜像 %local_image% 不存在
-    echo 请先运行: docker-compose up --build
+    echo 错误: 本地后端镜像 %backend_local% 不存在
+    echo 请先运行: docker-compose build backend
     pause
     exit /b 1
 )
 
-docker tag %local_image% %remote_image%
-echo 标签完成: %local_image% -> %remote_image%
-
-echo.
-echo 3. 推送镜像到Docker Hub...
-docker push %remote_image%
-
+docker tag %backend_local% %backend_remote%
+docker push %backend_remote%
 if %errorlevel% equ 0 (
-    echo.
-    echo ✅ 推送成功！
-    echo 镜像地址: https://hub.docker.com/r/beecool/music-player
+    echo ✅ 后端镜像推送成功: %backend_remote%
 ) else (
-    echo.
-    echo ❌ 推送失败
+    echo ❌ 后端镜像推送失败
+)
+
+:: --------------------------
+:: 4. 推送前端镜像
+:: --------------------------
+echo.
+echo 3. 推送前端镜像...
+docker images | findstr "ice-frontend" >nul
+if %errorlevel% neq 0 (
+    echo 错误: 本地前端镜像 %frontend_local% 不存在
+    echo 请先运行: docker-compose build frontend
+    pause
+    exit /b 1
+)
+
+docker tag %frontend_local% %frontend_remote%
+docker push %frontend_remote%
+if %errorlevel% equ 0 (
+    echo ✅ 前端镜像推送成功: %frontend_remote%
+) else (
+    echo ❌ 前端镜像推送失败
 )
 
 echo.

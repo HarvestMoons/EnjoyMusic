@@ -1,75 +1,87 @@
 <template>
   <div>
     <div class="player-container">
-      <h1>🎵 小蜜蜂大乐堂 🐝</h1>
+      <!-- 左侧歌单 -->
+      <div class="playlist-container">
+        <h3>当前歌单</h3>
+        <ul class="playlist">
+          <li
+              v-for="(song, index) in playlist"
+              :key="song.id"
+              :class="{ active: index === currentIndex }"
+              @click="handlePlaylistClick(index)"
+          >
+            {{ getSongTitle(song.name) }}
+          </li>
 
-      <div class="song-info">
-        <h2 id="current-song">当前未播放</h2>
-        <div class="vote-controls">
-          <button id="like-btn">👍 <span id="like-count">0</span></button>
-          <button id="dislike-btn">👎 <span id="dislike-count">0</span></button>
-        </div>
-        <audio id="audio-player" controls></audio>
+        </ul>
       </div>
 
-      <div class="controls">
-        <button id="play-btn">随便听听</button>
-        <button id="prev-btn">上一首</button>
-        <button id="toggleSpectrumBtn">显示频谱</button>
+      <!-- 右侧播放器信息 -->
+      <div class="song-info-container">
+        <div class="song-info">
+          <h2 id="current-song">当前未播放</h2>
+          <div class="vote-controls">
+            <button id="like-btn">👍 <span id="like-count">0</span></button>
+            <button id="dislike-btn">👎 <span id="dislike-count">0</span></button>
+          </div>
+          <audio id="audio-player" controls></audio>
+        </div>
 
-        <select id="play-mode">
-          <option value="random">连播模式：随机播放</option>
-          <option value="loop-list">连播模式：列表循环</option>
-          <option value="single-loop">连播模式：单曲循环</option>
-        </select>
+        <div class="controls">
+          <button id="play-btn">随便听听</button>
+          <button id="prev-btn">上一首</button>
+          <button id="toggleSpectrumBtn">显示频谱</button>
 
-        <select id="folder-selector">
-          <option value="ha_ji_mi">哈基咪咪</option>
-          <option value="dian_gun">溜冰密室</option>
-          <option value="da_si_ma">起飞基地</option>
-          <option value="ding_zhen">烟雾缭绕</option>
-          <option value="dxl">东洋雪莲</option>
-        </select>
+          <select id="play-mode">
+            <option value="random">连播模式：随机播放</option>
+            <option value="loop-list">连播模式：列表循环</option>
+            <option value="single-loop">连播模式：单曲循环</option>
+          </select>
 
-        <button class="author-btn" @click="openAuthor">
-          开发者信息
-        </button>
+          <select id="folder-selector">
+            <option value="ha_ji_mi">哈基咪咪</option>
+            <option value="dian_gun">溜冰密室</option>
+            <option value="da_si_ma">起飞基地</option>
+            <option value="ding_zhen">烟雾缭绕</option>
+            <option value="dxl">东洋雪莲</option>
+          </select>
+
+          <button class="author-btn" @click="openAuthor">
+            开发者信息
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- 频谱组件（已在另处实现） -->
+    <!-- 频谱 & 背景粒子 & Ripple -->
     <SpectrumVisualizer />
-
-    <!-- 背景粒子：组件会把 canvas 挂到 body（与原脚本行为一致） -->
-    <!-- 这里传入原来 script 的属性：zIndex, opacity, color, count -->
     <BackgroundParticles zIndex="0" opacity="0.4" color="0,0,0" :count="99" />
-    <BackgroundRipple apiBase="/api" /> <!-- 传入你的后端 base -->
+    <BackgroundRipple apiBase="/api" />
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import SpectrumVisualizer from './SpectrumVisualizer.vue'
 import BackgroundParticles from './BackgroundParticles.vue'
 import BackgroundRipple from "./BackgroundRipple.vue";
 
-// 配置（保持原有相对路径）
 const API_BASE = '/api';
 const DEFAULT_FOLDER = 'ha_ji_mi';
 
-// DOM元素（将在 init 中获取）
+// 响应式状态
+const playlist = ref([]);           // 歌曲列表
+const currentIndex = ref(-1);       // 当前播放索引
+const historyStack = ref([]);       // 历史播放栈
+
+// DOM元素
 let audioPlayer, currentSongEl, playBtn, prevBtn, playModeSelect, folderSelector;
 let likeBtn, dislikeBtn, likeCountEl, dislikeCountEl;
 
-// 状态变量（与原实现一致）
-let playlist = [];
-let currentIndex = -1;
-let currentFolder = DEFAULT_FOLDER;
-let historyStack = [];
-
-// 初始化
+// ------------------- 初始化 -------------------
 async function init() {
-  // 取得 DOM（必须在组件挂载后）
+  // 获取 DOM 元素
   audioPlayer = document.getElementById('audio-player');
   currentSongEl = document.getElementById('current-song');
   playBtn = document.getElementById('play-btn');
@@ -81,16 +93,12 @@ async function init() {
   likeCountEl = document.getElementById('like-count');
   dislikeCountEl = document.getElementById('dislike-count');
 
-  // 基础设置
-  folderSelector.value = DEFAULT_FOLDER;
-  currentFolder = DEFAULT_FOLDER;
   audioPlayer.crossOrigin = 'anonymous';
   audioPlayer.volume = 0.2;
+  folderSelector.value = DEFAULT_FOLDER;
 
-  // 事件监听
   setupEventListeners();
 
-  // 初始化文件夹并加载列表
   await setFolder(DEFAULT_FOLDER);
 }
 
@@ -104,6 +112,7 @@ function setupEventListeners() {
   dislikeBtn.addEventListener('click', handleDislike);
 }
 
+// ------------------- 歌单与文件夹 -------------------
 async function handleFolderChange() {
   const selectedFolder = folderSelector.value;
   await setFolder(selectedFolder);
@@ -112,26 +121,17 @@ async function handleFolderChange() {
 async function setFolder(folder) {
   try {
     showLoading(true);
-    const response = await fetch(`${API_BASE}/songs/set-folder`, {
+    const res = await fetch(`${API_BASE}/songs/set-folder`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ folder })
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
+    const result = await res.json();
 
     if (result.status === 'ok') {
-      currentFolder = folder;
-      historyStack = []; // 清空历史记录
+      historyStack.value = [];
       await fetchSongList();
-
-      if (playlist.length > 0) {
+      if (playlist.value.length > 0) {
         playSongAtIndex(0);
       } else {
         currentSongEl.textContent = '无可播放歌曲';
@@ -140,9 +140,9 @@ async function setFolder(folder) {
     } else {
       alert('切换失败：' + result.error);
     }
-  } catch (error) {
-    console.error('切换音乐文件夹失败', error);
-    alert('请求失败: ' + error.message);
+  } catch (err) {
+    console.error('切换音乐文件夹失败', err);
+    alert('请求失败: ' + err.message);
   } finally {
     showLoading(false);
   }
@@ -150,47 +150,49 @@ async function setFolder(folder) {
 
 async function fetchSongList() {
   try {
-    const response = await fetch(`${API_BASE}/songs/get`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    playlist = shuffleArray(data);
-    return playlist;
-  } catch (error) {
-    console.error("获取歌曲列表失败", error);
-    alert('获取歌曲列表失败: ' + error.message);
+    const res = await fetch(`${API_BASE}/songs/get`);
+    const data = await res.json();
+    playlist.value = shuffleArray(data);
+    return playlist.value;
+  } catch (err) {
+    console.error("获取歌曲列表失败", err);
+    alert('获取歌曲列表失败: ' + err.message);
     return [];
   }
 }
 
 function shuffleArray(array) {
-  const newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i--) {
+  const newArr = [...array];
+  for (let i = newArr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
   }
-  return newArray;
+  return newArr;
+}
+
+// ------------------- 播放控制 -------------------
+function handlePlaylistClick(index) {
+  //fromHistory设为false（默认），会把该点歌加入历史歌曲栈
+  playSongAtIndex(index);
+  const el = document.querySelector(`.playlist li.active`);
+  if (el) el.scrollIntoView({ block: 'nearest' });
 }
 
 function playSongAtIndex(index, fromHistory = false) {
-  if (index < 0 || index >= playlist.length) {
+  if (index < 0 || index >= playlist.value.length) {
     currentSongEl.textContent = '播放失败：索引越界';
     return;
   }
 
-  if (!fromHistory && currentIndex !== -1 && currentIndex !== index) {
-    historyStack.push(currentIndex);
+  if (!fromHistory && currentIndex.value !== -1 && currentIndex.value !== index) {
+    historyStack.value.push(currentIndex.value);
   }
 
-  currentIndex = index;
-  const item = playlist[index];
+  currentIndex.value = index;
+  const song = playlist.value[index];
 
-  audioPlayer.crossOrigin = 'anonymous';
-  audioPlayer.src = item.url;
-
-  const parsed = parseSongNameWithBv(item.name);
+  audioPlayer.src = song.url;
+  const parsed = parseSongNameWithBv(song.name);
   if (parsed.bv) {
     currentSongEl.innerHTML = `${parsed.title} <a href="https://www.bilibili.com/video/${parsed.bv}/" target="_blank" style="font-size:14px;color:#007bff;">[叽里咕噜说啥呢]</a>`;
   } else {
@@ -198,44 +200,34 @@ function playSongAtIndex(index, fromHistory = false) {
   }
 
   audioPlayer.play();
-  refreshVotes(item.id);
+  refreshVotes(song.id);
 }
 
-function parseSongNameWithBv(songName) {
-  const name = songName.replace(/\.mp3$/, '');
-  const match = name.match(/^(.*?)_?(BV[0-9A-Za-z]+)/);
-  if (match) {
-    return {
-      title: match[1],
-      bv: match[2]
-    };
-  }
-  return {
-    title: name,
-    bv: null
-  };
+function parseSongNameWithBv(name) {
+  const clean = name.replace(/\.mp3$/, '');
+  const match = clean.match(/^(.*?)_?(BV[0-9A-Za-z]+)/);
+  return match ? { title: match[1], bv: match[2] } : { title: clean, bv: null };
 }
 
 function playPreviousSong() {
-  if (historyStack.length === 0) {
+  if (historyStack.value.length === 0) {
     alert("没有上一首了！");
     return;
   }
-  const prevIndex = historyStack.pop();
-  playSongAtIndex(prevIndex, true);
+  const prev = historyStack.value.pop();
+  playSongAtIndex(prev, true);
 }
 
 function handlePlaybackEnd() {
   const diff = Math.abs(audioPlayer.currentTime - audioPlayer.duration);
-
   if (audioPlayer.duration > 0 && diff < 0.5) {
     const mode = playModeSelect.value;
     if (mode === 'single-loop') {
       audioPlayer.currentTime = 0;
       audioPlayer.play();
     } else if (mode === 'loop-list') {
-      const nextIndex = (currentIndex + 1) % playlist.length;
-      playSongAtIndex(nextIndex);
+      const next = (currentIndex.value + 1) % playlist.value.length;
+      playSongAtIndex(next);
     } else {
       playRandomSong();
     }
@@ -243,13 +235,12 @@ function handlePlaybackEnd() {
 }
 
 function handleAudioError() {
-  console.warn(`❌ 无法播放：${playlist[currentIndex]?.name}，尝试下一首`);
-
+  console.warn(`❌ 无法播放：${playlist.value[currentIndex.value]?.name}，尝试下一首`);
   setTimeout(() => {
     const mode = playModeSelect.value;
     if (mode === 'loop-list') {
-      const nextIndex = (currentIndex + 1) % playlist.length;
-      playSongAtIndex(nextIndex);
+      const next = (currentIndex.value + 1) % playlist.value.length;
+      playSongAtIndex(next);
     } else {
       playRandomSong();
     }
@@ -257,86 +248,63 @@ function handleAudioError() {
 }
 
 function playRandomSong() {
-  if (!playlist || playlist.length === 0) {
-    console.error('播放失败：歌曲列表为空');
+  if (!playlist.value || playlist.value.length === 0) {
     currentSongEl.textContent = '播放失败：歌曲列表为空';
     return;
   }
-
-  const randomIndex = Math.floor(Math.random() * playlist.length);
-  playSongAtIndex(randomIndex);
+  const rand = Math.floor(Math.random() * playlist.value.length);
+  playSongAtIndex(rand);
 }
 
 function handlePlayClick() {
   const mode = playModeSelect.value;
-  if (mode === 'loop-list' && playlist.length > 0) {
-    const nextIndex = (currentIndex + 1) % playlist.length;
-    playSongAtIndex(nextIndex);
+  if (mode === 'loop-list' && playlist.value.length > 0) {
+    const next = (currentIndex.value + 1) % playlist.value.length;
+    playSongAtIndex(next);
   } else {
     playRandomSong();
   }
 }
 
+// ------------------- 点赞 / 点踩 -------------------
 async function handleLike() {
-  if (!playlist[currentIndex]) return;
-
+  const song = playlist.value[currentIndex.value];
+  if (!song) return;
   try {
-    const songId = playlist[currentIndex].id;
-    const response = await fetch(`${API_BASE}/songs/like/${songId}`, {
-      method: 'POST'
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const res = await fetch(`${API_BASE}/songs/like/${song.id}`, { method: 'POST' });
+    const data = await res.json();
     likeCountEl.textContent = data.likes;
     dislikeCountEl.textContent = data.dislikes;
-  } catch (error) {
-    console.error('点赞失败', error);
-    alert('点赞失败: ' + error.message);
+  } catch (err) {
+    console.error('点赞失败', err);
   }
 }
 
 async function handleDislike() {
-  if (!playlist[currentIndex]) return;
-
+  const song = playlist.value[currentIndex.value];
+  if (!song) return;
   try {
-    const songId = playlist[currentIndex].id;
-    const response = await fetch(`${API_BASE}/songs/dislike/${songId}`, {
-      method: 'POST'
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const res = await fetch(`${API_BASE}/songs/dislike/${song.id}`, { method: 'POST' });
+    const data = await res.json();
     likeCountEl.textContent = data.likes;
     dislikeCountEl.textContent = data.dislikes;
-  } catch (error) {
-    console.error('点踩失败', error);
-    alert('点踩失败: ' + error.message);
+  } catch (err) {
+    console.error('点踩失败', err);
   }
 }
 
 async function refreshVotes(songId) {
   try {
-    const response = await fetch(`${API_BASE}/songs/votes/${songId}`);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const res = await fetch(`${API_BASE}/songs/votes/${songId}`);
+    const data = await res.json();
     likeCountEl.textContent = data.likes;
     dislikeCountEl.textContent = data.dislikes;
-  } catch (error) {
-    console.error('获取投票数失败', error);
+  } catch (err) {
+    console.error('获取投票数失败', err);
   }
 }
 
+// ------------------- 工具 -------------------
 function showLoading(show) {
   document.body.classList.toggle('loading', show);
 }
@@ -345,7 +313,15 @@ function openAuthor() {
   window.open('https://github.com/HarvestMoons/HarvestMoons', '_blank');
 }
 
-// 组件挂载后初始化（替代原来的 DOMContentLoaded）
+function getSongTitle(name) {
+  // 去掉后缀 .mp3
+  let title = name.replace(/\.(mp3)$/i, '');
+  const match = title.match(/^(.*?)_?BV[0-9A-Za-z]+/i);
+  if (match) title = match[1];
+  return title;
+}
+
+
 onMounted(() => {
   init();
 });
@@ -434,4 +410,51 @@ audio {
 .vote-controls button:hover {
   background-color: #cfe0fc;
 }
+
+.player-container {
+  display: flex;
+  gap: 20px;
+}
+
+.playlist-container {
+  flex: 1 1 200px;
+  max-height: 500px;
+  overflow-y: auto;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid #e0e4e8;
+}
+
+.playlist-container ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.playlist-container li {
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+
+  white-space: nowrap;         /* 单行 */
+  overflow: hidden;            /* 超出隐藏 */
+  text-overflow: ellipsis;     /* 显示省略号 */
+}
+
+
+.playlist-container li:hover {
+  background-color: #f0f2f5;
+}
+
+.playlist-container li.active {
+  background-color: #5ab9ea;
+  color: #fff;
+}
+
+.song-info-container {
+  flex: 2 1 auto;
+}
+
 </style>

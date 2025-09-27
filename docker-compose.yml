@@ -8,14 +8,14 @@ services:
     container_name: spring_app
     restart: always
     ports:
-      - "8082:8082"            # 保留你原来的外部端口映射
+      - "8082:8082"
     depends_on:
       - redis
 
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile  # frontend/Dockerfile（见下）
+      dockerfile: Dockerfile
     container_name: frontend_nginx
     restart: always
     ports:
