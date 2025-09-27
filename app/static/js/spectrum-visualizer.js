@@ -110,7 +110,11 @@
 
     function draw() {
         requestAnimationFrame(draw);
-        if (!showSpectrum) return;
+        // 同时检查showSpectrum和canvas的实际显示状态
+        if (!showSpectrum || canvas.style.display === "none" || canvas.style.visibility === "hidden") {
+            clearCanvas();
+            return;
+        }
         if (mode === "spectrum") drawSpectrum();
         else if (mode === "waveform") drawWaveform();
         else drawCircleSpectrum();

@@ -243,6 +243,7 @@ async function playCachedVideo(selectedVideo, fromCache = false) {
         zIndex: "10000"
     });
 
+    audioPlayer.pause();
     videoElement.autoplay = true;
     videoElement.loop = false;
 
@@ -310,6 +311,7 @@ function stopVideo() {
         overlay = null;
     }
     isTriggered = false;
+    audioPlayer.play();
 
     document.addEventListener("mouseup", clearOverlay);
     document.addEventListener("mouseleave", clearOverlay);
