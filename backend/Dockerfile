@@ -1,8 +1,9 @@
 # 第一阶段：构建阶段
 FROM maven:3.9-eclipse-temurin-22 AS builder
 WORKDIR /app
-COPY pom.xml .
-COPY src ./src
+# 复制 pom.xml 和源码（注意路径）
+COPY backend/pom.xml .
+COPY backend/src ./src
 # 打包应用程序
 RUN mvn clean package -DskipTests
 
