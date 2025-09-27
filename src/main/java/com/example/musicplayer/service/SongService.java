@@ -51,7 +51,7 @@ public class SongService {
             String key = summary.getKey();
             if (key.toLowerCase().endsWith(".mp3")) {
                 String filename = key.substring(key.lastIndexOf("/") + 1);
-                String signedUrl = ossClient.generatePresignedUrl(bucketName, key, new Date(System.currentTimeMillis() + 3600 * 1000)).toString();
+                String signedUrl = ossClient.generatePresignedUrl(bucketName, key, new Date(System.currentTimeMillis() + 60*60 * 1000*24)).toString();
 
                 Song song = new Song();
                 song.setId(Integer.toHexString(key.hashCode()));
@@ -96,4 +96,5 @@ public class SongService {
         redisTemplate.opsForValue().increment("dislikes:" + songId);
         return getVotes(songId);
     }
+
 }

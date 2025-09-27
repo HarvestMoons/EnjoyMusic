@@ -1,14 +1,15 @@
-# 使用官方 OpenJDK 作为基础镜像
-FROM openjdk:22-jdk-slim
-
-# 设置工作目录
+# 第一阶段：构建阶段
+FROM maven:3.9-eclipse-temurin-22 AS builder
 WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+# 打包应用程序
+RUN mvn clean package -DskipTests
 
-# 将 Maven/Gradle 构建出来的 jar 包拷贝到容器
-COPY target/Ice-1.0-SNAPSHOT.jar app.jar
-
-# 暴露端口（Spring Boot 默认 8080,修改到8082）
+# 第二阶段：运行阶段
+FROM openjdk:22-jdk-slim
+WORKDIR /app
+# 从构建阶段复制打好的 jar 包
+COPY --from=builder /app/target/Ice-1.0-SNAPSHOT.jar app.jar
 EXPOSE 8082
-
-# 启动 Spring Boot 应用
 ENTRYPOINT ["java", "-jar", "app.jar"]

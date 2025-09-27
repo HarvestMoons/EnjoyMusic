@@ -112,11 +112,65 @@
         .vote-controls button:hover {
             background-color: #cfe0fc;
         }
-
-        .loading {
-            opacity: 0.7;
+        .ripple-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
             pointer-events: none;
+            overflow: hidden;
         }
+
+        .ripple-circle {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 70%);
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            transition: all 2s ease-out;
+        }
+
+        .dark-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+        }
+
+        .ripple-overlay.active .ripple-circle {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(30); /* 放大更多确保覆盖整个屏幕 */
+        }
+
+        .ripple-overlay.active .dark-background {
+            opacity: 1; /* 改为1确保完全黑色 */
+        }
+
+        /* 视频播放时的状态 */
+        .ripple-overlay.video-playing .ripple-circle {
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+
+        .ripple-overlay.video-playing .dark-background {
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+
+        .ripple-overlay.fade-out .ripple-circle,
+        .ripple-overlay.fade-out .dark-background {
+            opacity: 0 !important;
+            transition: opacity 0.3s ease-in;
+        }
+
     </style>
 </head>
 
@@ -194,7 +248,7 @@
 
         // 设置音频播放器
         audioPlayer.crossOrigin = 'anonymous';
-        audioPlayer.volume = 0.3;
+        audioPlayer.volume = 0.2;
 
         // 事件监听
         setupEventListeners();
@@ -227,7 +281,7 @@
     async function setFolder(folder) {
         try {
             showLoading(true);
-            const response = await fetch(`${API_BASE}/set-folder`, {
+            const response = await fetch(`${API_BASE}/songs/set-folder`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -266,7 +320,7 @@
     // 获取歌曲列表
     async function fetchSongList() {
         try {
-            const response = await fetch(`${API_BASE}/songs`);
+            const response = await fetch(`${API_BASE}/songs/get`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -407,7 +461,7 @@
 
         try {
             const songId = playlist[currentIndex].id;
-            const response = await fetch(`${API_BASE}/like/${songId}`, {
+            const response = await fetch(`${API_BASE}/songs/like/${songId}`, {
                 method: 'POST'
             });
 
@@ -430,7 +484,7 @@
 
         try {
             const songId = playlist[currentIndex].id;
-            const response = await fetch(`${API_BASE}/dislike/${songId}`, {
+            const response = await fetch(`${API_BASE}/songs/dislike/${songId}`, {
                 method: 'POST'
             });
 
@@ -450,7 +504,7 @@
     // 刷新投票数
     async function refreshVotes(songId) {
         try {
-            const response = await fetch(`${API_BASE}/votes/${songId}`);
+            const response = await fetch(`${API_BASE}/songs/votes/${songId}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
