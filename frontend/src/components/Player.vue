@@ -1,6 +1,7 @@
 <template>
   <div>
     <div class="layout">
+      <Sidebar />
       <!-- 左侧歌单 -->
       <Playlist
           :playlist="playlist"
@@ -40,10 +41,6 @@
                 <option value="ding_zhen">烟雾缭绕</option>
                 <option value="dxl">东洋雪莲</option>
               </select>
-
-              <button class="author-btn" @click="openAuthor">
-                开发者信息
-              </button>
             </div>
           </div>
         </div>
@@ -64,6 +61,7 @@ import SpectrumVisualizer from './SpectrumVisualizer.vue'
 import BackgroundParticles from './BackgroundParticles.vue'
 import BackgroundRipple from "./BackgroundRipple.vue";
 import Playlist from './Playlist.vue'
+import Sidebar from "./Sidebar.vue";
 
 const API_BASE = '/api';
 const DEFAULT_FOLDER = 'ha_ji_mi';
@@ -306,19 +304,6 @@ function showLoading(show) {
   document.body.classList.toggle('loading', show);
 }
 
-function openAuthor() {
-  window.open('https://github.com/HarvestMoons/HarvestMoons', '_blank');
-}
-
-function getSongTitle(name) {
-  // 去掉后缀 .mp3
-  let title = name.replace(/\.(mp3)$/i, '');
-  const match = title.match(/^(.*?)_?BV[0-9A-Za-z]+/i);
-  if (match) title = match[1];
-  return title;
-}
-
-
 onMounted(() => {
   init();
 });
@@ -425,6 +410,5 @@ audio {
 .song-info-container {
   flex: 2 1 auto;
 }
-
 
 </style>
