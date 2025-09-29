@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import Player from './components/Player.vue'
+import Player from './components/feature/player/Player.vue'
 </script>
 
 <style scoped>

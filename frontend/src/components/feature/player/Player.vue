@@ -57,11 +57,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import SpectrumVisualizer from './SpectrumVisualizer.vue'
-import BackgroundParticles from './BackgroundParticles.vue'
-import BackgroundRipple from "./BackgroundRipple.vue";
+import SpectrumVisualizer from '../spectrum/SpectrumVisualizer.vue'
+import BackgroundParticles from '../../effects/BackgroundParticles.vue'
+import BackgroundRipple from "../../effects/BackgroundRipple.vue";
 import Playlist from './Playlist.vue'
-import Sidebar from "./Sidebar.vue";
+import Sidebar from "../../layout/Sidebar.vue";
 
 const API_BASE = '/api';
 const DEFAULT_FOLDER = 'ha_ji_mi';

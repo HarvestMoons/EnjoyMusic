@@ -7,7 +7,7 @@
 
 <script setup>
 import {onMounted, onBeforeUnmount, ref} from 'vue';
-import HelpTooltip from "./HelpTooltip.vue";
+import HelpTooltip from "../../common/HelpTooltip.vue";
 
 //showSpectrum 是响应式变量，协助控制HelpTooltip的出现
 const showSpectrum = ref(false)

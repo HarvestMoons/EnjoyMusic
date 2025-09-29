@@ -1,8 +1,3 @@
-<template>
-  <!-- 组件本身不渲染任何可见 DOM，canvas 将被附加到 document.body -->
-  <div style="display:none" aria-hidden="true"></div>
-</template>
-
 <script setup>
 import { onMounted, onBeforeUnmount } from 'vue';
 
@@ -171,7 +166,3 @@ onBeforeUnmount(() => {
   }
 });
 </script>
-
-<style>
-/* 不在组件内渲染视觉 DOM，canvas 已直接插入 body，样式由 canvas.style.cssText 控制 */
-</style>
