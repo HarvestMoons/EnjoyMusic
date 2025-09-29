@@ -33,7 +33,7 @@ onMounted(() => {
   }
 
   const ctx = canvas.getContext("2d");
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  audioCtx = new AudioContext();
 
   try {
     // createMediaElementSource 在同一页面只能被创建一次连接到同一个媒体元素。
@@ -78,17 +78,12 @@ onMounted(() => {
   const toggleHandler = () => {
     showSpectrum.value = !showSpectrum.value;
     if (btn) btn.textContent = showSpectrum.value ? "隐藏频谱" : "显示频谱";
-
+    //container.style.height=上下padding（2*15px）+ canvas height（280px）
+    const height = showSpectrum.value ? "310px" : "0";
+    const opacity = showSpectrum.value ? "1" : "0";
     if (container) {
-      // 修改容器高度来控制显示/隐藏
-      if (showSpectrum.value) {
-        //container.style.height=上下padding（2*15px）+ canvas height（280px）
-        container.style.height = "310px";
-        canvas.style.opacity = "1";
-      } else {
-        container.style.height = "0";
-        canvas.style.opacity = "0";
-      }
+      container.style.height = height;
+      canvas.style.opacity = opacity;
     }
   };
 
@@ -173,7 +168,7 @@ onMounted(() => {
 
   function draw() {
     rafId = requestAnimationFrame(draw);
-    if (!showSpectrum.value || (container && container.style.height === "0px") ){
+    if (!showSpectrum.value) {
       clearCanvas();
       return;
     }
@@ -209,21 +204,10 @@ onMounted(() => {
     document.removeEventListener("keydown", keydownResumeHandler);
     document.removeEventListener("keydown", modeKeyHandler);
     if (rafId) cancelAnimationFrame(rafId);
-    try {
-      if (source) {
-        source.disconnect();
-      }
-      if (analyser) analyser.disconnect();
-      if (audioCtx && typeof audioCtx.close === 'function') {
-        audioCtx.close();
-      }
-    } catch (e) {
-      // ignore disconnect errors
-    }
-    rafId = null;
-    audioCtx = null;
-    source = null;
-    analyser = null;
+
+    [source, analyser].forEach(node => { try { node?.disconnect(); } catch(e){} });
+    try { audioCtx?.close(); } catch(e){}
+    rafId = null; audioCtx = null; source = null; analyser = null;
   };
 });
 
