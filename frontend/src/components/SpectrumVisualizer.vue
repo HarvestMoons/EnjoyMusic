@@ -64,7 +64,7 @@ onMounted(() => {
     }
   }
 
-// 初始设置容器高度（而不是canvas的display）
+// 初始设置容器高度
   const container = canvas.parentElement;
   if (container) {
     container.style.height = "0";
@@ -78,7 +78,8 @@ onMounted(() => {
     if (container) {
       // 修改容器高度来控制显示/隐藏
       if (showSpectrum) {
-        container.style.height = "260px";
+        //container.style.height=上下padding（2*15px）+ canvas height（280px）
+        container.style.height = "310px";
         canvas.style.opacity = "1";
       } else {
         container.style.height = "0";
@@ -242,22 +243,22 @@ onBeforeUnmount(() => {
 
 <style>
 .spectrum-container {
-  margin: 24px auto 0 auto;
-  max-width: 900px;
+  margin: 0;                /* 去掉居中 */
+  width: 100%;              /* 占满父容器 */
+  max-width: none;          /* 取消 max-width */
+  padding: 15px 20px;
+  box-sizing: border-box;   /* 让 padding 不增加总宽度 */
   background: linear-gradient(180deg, #ffd8b0, #ffb685, #ff9f6a);
   border-radius: 12px;
-  padding: 16px;
-  /* 添加overflow隐藏，确保收起时内容不显示 */
   overflow: hidden;
-  /* 添加过渡效果 */
   transition: height 0.3s ease;
-  /* 添加最小高度，确保收起时显示容器背景 */
-  min-height: 10px;
+  min-height: 15px;
 }
+
 #spectrumCanvas {
   display: block;
   width: 100%;
-  height: 260px;
+  height: 280px;
   border-radius: 8px;
   background-color: #fff8f0;
   /* 添加过渡效果 */

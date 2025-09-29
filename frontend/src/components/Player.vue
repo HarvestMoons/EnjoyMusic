@@ -154,7 +154,6 @@ async function fetchSongList() {
     return playlist.value;
   } catch (err) {
     console.error("获取歌曲列表失败", err);
-    alert('获取歌曲列表失败: ' + err.message);
     return [];
   }
 }
@@ -326,10 +325,9 @@ onMounted(() => {
 </script>
 
 <style>
-/* 直接保留你原来的样式（实际项目中可抽出到全局 CSS） */
 body {
   font-family: 'Arial', sans-serif;
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
   background-color: #f0f2f5;
@@ -342,13 +340,14 @@ body {
   align-items: flex-start;
 }
 
-/* 新增：右边纵向排列 */
 .right-container {
   display: flex;
   flex-direction: column;
-  flex: 1; /* 占满剩余空间 */
+  flex: 1;
   gap: 20px;
+  align-items: stretch; /* 新增：让子元素宽度跟右侧容器一致 */
 }
+
 
 /* 现在 player-container 不再控制左右分布，只保留样式 */
 .player-container {
@@ -360,7 +359,6 @@ body {
   border: 1px solid #e0e4e8;
 }
 
-/* 其余样式保持与原文件一致（此处为简洁省略重复，实际请保留你原样式） */
 .controls {
   display: flex;
   flex-wrap: wrap;

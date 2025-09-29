@@ -30,33 +30,53 @@ function getSongTitle(name) {
 </script>
 
 <style scoped>
-.playlist {
-  width: 300px;               /* 固定宽度 */
-  max-height: 670px;          /* 限制高度（根据 player-container 高度设置） */
-  overflow-y: auto;           /* 超出时内部滚动 */
-  border-right: 1px solid #ccc;
-  padding: 10px;
+.playlist-container {
+  width: 320px;                 /* 略微增加宽度，更舒适 */
+  background: #fff;             /* 白色背景更清爽 */
+  border-radius: 8px;           /* 圆角 */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* 轻微阴影 */
+  padding: 16px;
   box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.playlist ul {
-  list-style: none;
-  margin: 0;
+.playlist-container h3 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  color: #333;
+  font-weight: 600;
+}
+
+.playlist {
+  max-height: 670px;            /* 保留原有高度限制 */
+  overflow-y: auto;             /* 纵向滚动 */
+  overflow-x: hidden;           /* 禁止横向滚动 */
   padding: 0;
+  margin: 0;
 }
 
 .playlist li {
-  padding: 6px 8px;
+  list-style: none;
+  padding: 10px 12px;
+  margin-bottom: 6px;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  color: #555;
+  background: #fafafa;
+  box-shadow: inset 0 0 0 rgba(0,0,0,0); /* 防止hover闪烁 */
 }
 
 .playlist li:hover {
-  background: #f0f0f0;
+  background: #e0f0ff;
+  color: #333;
+  transform: translateX(4px);  /* hover微位移增加交互感 */
 }
 
 .playlist li.active {
-  background: #5ab9ea;
+  background: #2196f3;
   color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
 }
 </style>
