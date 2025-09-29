@@ -1,13 +1,16 @@
 <template>
   <div class="spectrum-container">
-    <!-- 保留原 id，样式与原来一致 -->
+    <HelpTooltip v-show="showSpectrum">- 按 M 切换频谱模式</HelpTooltip>
     <canvas id="spectrumCanvas"></canvas>
   </div>
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount } from 'vue';
+import {onMounted, onBeforeUnmount, ref} from 'vue';
+import HelpTooltip from "./HelpTooltip.vue";
 
+//showSpectrum 是响应式变量，协助控制HelpTooltip的出现
+const showSpectrum = ref(false)
 let rafId = null;
 let audioCtx = null;
 let source = null;
@@ -18,10 +21,11 @@ onMounted(() => {
   const canvas = document.getElementById("spectrumCanvas");
   const btn = document.getElementById("toggleSpectrumBtn");
   const rect = canvas.getBoundingClientRect();
+
   canvas.width = rect.width;
   canvas.height = rect.height;
 
-  let showSpectrum = false;
+
 
   if (!audio || !canvas) {
     console.error("找不到 #audio-player 或 #spectrumCanvas，无法启动可视化");
@@ -72,12 +76,12 @@ onMounted(() => {
   }
 
   const toggleHandler = () => {
-    showSpectrum = !showSpectrum;
-    if (btn) btn.textContent = showSpectrum ? "隐藏频谱" : "显示频谱";
+    showSpectrum.value = !showSpectrum.value;
+    if (btn) btn.textContent = showSpectrum.value ? "隐藏频谱" : "显示频谱";
 
     if (container) {
       // 修改容器高度来控制显示/隐藏
-      if (showSpectrum) {
+      if (showSpectrum.value) {
         //container.style.height=上下padding（2*15px）+ canvas height（280px）
         container.style.height = "310px";
         canvas.style.opacity = "1";
@@ -169,7 +173,7 @@ onMounted(() => {
 
   function draw() {
     rafId = requestAnimationFrame(draw);
-    if (!showSpectrum || (container && container.style.height === "0px") ){
+    if (!showSpectrum.value || (container && container.style.height === "0px") ){
       clearCanvas();
       return;
     }
@@ -243,6 +247,7 @@ onBeforeUnmount(() => {
 
 <style>
 .spectrum-container {
+  position: relative;       /* 确保内部绝对定位元素生效 */
   margin: 0;                /* 去掉居中 */
   width: 100%;              /* 占满父容器 */
   max-width: none;          /* 取消 max-width */
@@ -264,4 +269,11 @@ onBeforeUnmount(() => {
   /* 添加过渡效果 */
   transition: opacity 0.3s ease;
 }
+
+.spectrum-container .help-tooltip-wrapper {
+  position: absolute;
+  top: 18px;
+  right: 23px;
+}
+
 </style>
