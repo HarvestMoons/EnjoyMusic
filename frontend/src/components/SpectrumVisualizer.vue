@@ -14,10 +14,13 @@ let source = null;
 let analyser = null;
 
 onMounted(() => {
-  // 把原脚本的 IIFE 内容搬进来（尽量一模一样的逻辑）
   const audio = document.getElementById("audio-player");
   const canvas = document.getElementById("spectrumCanvas");
   const btn = document.getElementById("toggleSpectrumBtn");
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+
   let showSpectrum = false;
 
   if (!audio || !canvas) {
@@ -61,13 +64,27 @@ onMounted(() => {
     }
   }
 
-  // 初始隐藏 canvas（与原脚本保持一致）
-  canvas.style.display = "none";
+// 初始设置容器高度（而不是canvas的display）
+  const container = canvas.parentElement;
+  if (container) {
+    container.style.height = "0";
+    canvas.style.opacity = "0";
+  }
 
   const toggleHandler = () => {
     showSpectrum = !showSpectrum;
     if (btn) btn.textContent = showSpectrum ? "隐藏频谱" : "显示频谱";
-    canvas.style.display = showSpectrum ? "block" : "none";
+
+    if (container) {
+      // 修改容器高度来控制显示/隐藏
+      if (showSpectrum) {
+        container.style.height = "260px";
+        canvas.style.opacity = "1";
+      } else {
+        container.style.height = "0";
+        canvas.style.opacity = "0";
+      }
+    }
   };
 
   if (btn) btn.addEventListener("click", toggleHandler);
@@ -151,7 +168,7 @@ onMounted(() => {
 
   function draw() {
     rafId = requestAnimationFrame(draw);
-    if (!showSpectrum || canvas.style.display === "none" || canvas.style.visibility === "hidden") {
+    if (!showSpectrum || (container && container.style.height === "0px") ){
       clearCanvas();
       return;
     }
@@ -224,13 +241,18 @@ onBeforeUnmount(() => {
 </script>
 
 <style>
-/* 仅用于容器位置/外观（样式可由 Player.vue 中的样式控制） */
 .spectrum-container {
   margin: 24px auto 0 auto;
   max-width: 900px;
   background: linear-gradient(180deg, #ffd8b0, #ffb685, #ff9f6a);
   border-radius: 12px;
   padding: 16px;
+  /* 添加overflow隐藏，确保收起时内容不显示 */
+  overflow: hidden;
+  /* 添加过渡效果 */
+  transition: height 0.3s ease;
+  /* 添加最小高度，确保收起时显示容器背景 */
+  min-height: 10px;
 }
 #spectrumCanvas {
   display: block;
@@ -238,5 +260,7 @@ onBeforeUnmount(() => {
   height: 260px;
   border-radius: 8px;
   background-color: #fff8f0;
+  /* 添加过渡效果 */
+  transition: opacity 0.3s ease;
 }
 </style>

@@ -1,7 +1,7 @@
 const CACHE_NAME = 'app-cache-v1';
 const VIDEO_CACHE = 'video-cache-v1';
 const MAX_VIDEO_ENTRIES = 5; // 限制最多缓存 5 个视频
-const MAX_VIDEO_SIZE = 150 * 1024 * 1024; // 限制视频缓存总大小 150MB
+const MAX_VIDEO_SIZE = 500 * 1024 * 1024; // 限制视频缓存总大小 500MB
 
 // 打开缓存辅助函数
 async function openCache(name) {
@@ -49,11 +49,7 @@ self.addEventListener('install', (event) => {
         caches.open(CACHE_NAME).then((cache) =>
             cache.addAll([
                 '/',
-                '/index.html',
-                '/static/js/background-particles.js',
-                '/static/js/ripple.js',
-                '/static/js/spectrum-visualizer.js',
-                '/favicon.png',
+                './favicon.png',
             ])
         )
     );

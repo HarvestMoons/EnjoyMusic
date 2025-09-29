@@ -1,61 +1,58 @@
 <template>
   <div>
-    <div class="player-container">
+    <div class="layout">
       <!-- 左侧歌单 -->
-      <div class="playlist-container">
-        <h3>当前歌单</h3>
-        <ul class="playlist">
-          <li
-              v-for="(song, index) in playlist"
-              :key="song.id"
-              :class="{ active: index === currentIndex }"
-              @click="handlePlaylistClick(index)"
-          >
-            {{ getSongTitle(song.name) }}
-          </li>
+      <Playlist
+          :playlist="playlist"
+          :currentIndex="currentIndex"
+          @select="handlePlaylistClick"
+      />
 
-        </ul>
-      </div>
+      <!-- 右侧容器：播放器 + 频谱 -->
+      <div class="right-container">
+        <div class="player-container">
+          <div class="song-info-container">
+            <!-- 原来的播放器信息保持不变 -->
+            <div class="song-info">
+              <h2 id="current-song">当前未播放</h2>
+              <div class="vote-controls">
+                <button id="like-btn">👍 <span id="like-count">0</span></button>
+                <button id="dislike-btn">👎 <span id="dislike-count">0</span></button>
+              </div>
+              <audio id="audio-player" controls></audio>
+            </div>
 
-      <!-- 右侧播放器信息 -->
-      <div class="song-info-container">
-        <div class="song-info">
-          <h2 id="current-song">当前未播放</h2>
-          <div class="vote-controls">
-            <button id="like-btn">👍 <span id="like-count">0</span></button>
-            <button id="dislike-btn">👎 <span id="dislike-count">0</span></button>
+            <div class="controls">
+              <button id="play-btn">随便听听</button>
+              <button id="prev-btn">上一首</button>
+              <button id="toggleSpectrumBtn">显示频谱</button>
+
+              <select id="play-mode">
+                <option value="random">连播模式：随机播放</option>
+                <option value="loop-list">连播模式：列表循环</option>
+                <option value="single-loop">连播模式：单曲循环</option>
+              </select>
+
+              <select id="folder-selector">
+                <option value="ha_ji_mi">哈基咪咪</option>
+                <option value="dian_gun">溜冰密室</option>
+                <option value="da_si_ma">起飞基地</option>
+                <option value="ding_zhen">烟雾缭绕</option>
+                <option value="dxl">东洋雪莲</option>
+              </select>
+
+              <button class="author-btn" @click="openAuthor">
+                开发者信息
+              </button>
+            </div>
           </div>
-          <audio id="audio-player" controls></audio>
         </div>
 
-        <div class="controls">
-          <button id="play-btn">随便听听</button>
-          <button id="prev-btn">上一首</button>
-          <button id="toggleSpectrumBtn">显示频谱</button>
-
-          <select id="play-mode">
-            <option value="random">连播模式：随机播放</option>
-            <option value="loop-list">连播模式：列表循环</option>
-            <option value="single-loop">连播模式：单曲循环</option>
-          </select>
-
-          <select id="folder-selector">
-            <option value="ha_ji_mi">哈基咪咪</option>
-            <option value="dian_gun">溜冰密室</option>
-            <option value="da_si_ma">起飞基地</option>
-            <option value="ding_zhen">烟雾缭绕</option>
-            <option value="dxl">东洋雪莲</option>
-          </select>
-
-          <button class="author-btn" @click="openAuthor">
-            开发者信息
-          </button>
-        </div>
+        <!-- 把频谱搬到右侧容器内部 -->
+        <SpectrumVisualizer />
       </div>
     </div>
 
-    <!-- 频谱 & 背景粒子 & Ripple -->
-    <SpectrumVisualizer />
     <BackgroundParticles zIndex="0" opacity="0.4" color="0,0,0" :count="99" />
     <BackgroundRipple apiBase="/api" />
   </div>
@@ -66,6 +63,7 @@ import { ref, onMounted } from 'vue'
 import SpectrumVisualizer from './SpectrumVisualizer.vue'
 import BackgroundParticles from './BackgroundParticles.vue'
 import BackgroundRipple from "./BackgroundRipple.vue";
+import Playlist from './Playlist.vue'
 
 const API_BASE = '/api';
 const DEFAULT_FOLDER = 'ha_ji_mi';
@@ -338,7 +336,23 @@ body {
   color: #333;
 }
 
+.layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* 新增：右边纵向排列 */
+.right-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* 占满剩余空间 */
+  gap: 20px;
+}
+
+/* 现在 player-container 不再控制左右分布，只保留样式 */
 .player-container {
+  flex: 2 1 auto;
   background-color: #ffffff;
   border-radius: 12px;
   padding: 20px;
@@ -410,51 +424,9 @@ audio {
 .vote-controls button:hover {
   background-color: #cfe0fc;
 }
-
-.player-container {
-  display: flex;
-  gap: 20px;
-}
-
-.playlist-container {
-  flex: 1 1 200px;
-  max-height: 500px;
-  overflow-y: auto;
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 12px;
-  border: 1px solid #e0e4e8;
-}
-
-.playlist-container ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.playlist-container li {
-  padding: 6px 10px;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-
-  white-space: nowrap;         /* 单行 */
-  overflow: hidden;            /* 超出隐藏 */
-  text-overflow: ellipsis;     /* 显示省略号 */
-}
-
-
-.playlist-container li:hover {
-  background-color: #f0f2f5;
-}
-
-.playlist-container li.active {
-  background-color: #5ab9ea;
-  color: #fff;
-}
-
 .song-info-container {
   flex: 2 1 auto;
 }
+
 
 </style>

@@ -202,7 +202,7 @@ async function playCachedVideo(selectedVideo, fromCache = false) {
 
   function onVideoClick() {
     clickCount += 1;
-    if (clickCount >= 2) {
+    if (clickCount >= 3) {
       stopVideoInternal();
       document.removeEventListener("click", onVideoClick);
     }
