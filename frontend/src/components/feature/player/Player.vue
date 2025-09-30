@@ -1,57 +1,35 @@
 <template>
-  <div>
-    <div class="layout">
-      <Sidebar />
-      <!-- 左侧歌单 -->
-      <Playlist
-          :playlist="playlist"
-          :currentIndex="currentIndex"
-          @select="handlePlaylistClick"
-      />
-
-      <!-- 右侧容器：播放器 + 频谱 -->
-      <div class="right-container">
-        <div class="player-container">
-          <div class="song-info-container">
-            <!-- 原来的播放器信息保持不变 -->
-            <div class="song-info">
-              <h2 id="current-song">当前未播放</h2>
-              <div class="vote-controls">
-                <button id="like-btn">👍 <span id="like-count">0</span></button>
-                <button id="dislike-btn">👎 <span id="dislike-count">0</span></button>
-              </div>
-              <audio id="audio-player" controls></audio>
-            </div>
-
-            <div class="controls">
-              <button id="play-btn">随便听听</button>
-              <button id="prev-btn">上一首</button>
-              <button id="toggleSpectrumBtn">显示频谱</button>
-
-              <select id="play-mode">
-                <option value="random">连播模式：随机播放</option>
-                <option value="loop-list">连播模式：列表循环</option>
-                <option value="single-loop">连播模式：单曲循环</option>
-              </select>
-
-              <select id="folder-selector">
-                <option value="ha_ji_mi">哈基咪咪</option>
-                <option value="dian_gun">溜冰密室</option>
-                <option value="da_si_ma">起飞基地</option>
-                <option value="ding_zhen">烟雾缭绕</option>
-                <option value="dxl">东洋雪莲</option>
-              </select>
-            </div>
-          </div>
+  <div class="player-container">
+    <div class="song-info-container">
+      <div class="song-info">
+        <h2 id="current-song">当前未播放</h2>
+        <div class="vote-controls">
+          <button id="like-btn">👍 <span id="like-count">0</span></button>
+          <button id="dislike-btn">👎 <span id="dislike-count">0</span></button>
         </div>
+        <audio id="audio-player" controls></audio>
+      </div>
 
-        <!-- 把频谱搬到右侧容器内部 -->
-        <SpectrumVisualizer />
+      <div class="controls">
+        <button id="play-btn">随便听听</button>
+        <button id="prev-btn">上一首</button>
+        <button id="toggleSpectrumBtn">显示频谱</button>
+
+        <select id="play-mode">
+          <option value="random">连播模式：随机播放</option>
+          <option value="loop-list">连播模式：列表循环</option>
+          <option value="single-loop">连播模式：单曲循环</option>
+        </select>
+
+        <select id="folder-selector">
+          <option value="ha_ji_mi">哈基咪咪</option>
+          <option value="dian_gun">溜冰密室</option>
+          <option value="da_si_ma">起飞基地</option>
+          <option value="ding_zhen">烟雾缭绕</option>
+          <option value="dxl">东洋雪莲</option>
+        </select>
       </div>
     </div>
-
-    <BackgroundParticles zIndex="0" opacity="0.4" color="0,0,0" :count="99" />
-    <BackgroundRipple apiBase="/api" />
   </div>
 </template>
 
@@ -166,12 +144,6 @@ function shuffleArray(array) {
 }
 
 // ------------------- 播放控制 -------------------
-function handlePlaylistClick(index) {
-  //fromHistory设为false（默认），会把该点歌加入历史歌曲栈
-  playSongAtIndex(index);
-  const el = document.querySelector(`.playlist li.active`);
-  if (el) el.scrollIntoView({ block: 'nearest' });
-}
 
 function playSongAtIndex(index, fromHistory = false) {
   if (index < 0 || index >= playlist.value.length) {
@@ -307,34 +279,16 @@ function showLoading(show) {
 onMounted(() => {
   init();
 });
+
+// 对外暴露响应式对象和方法
+defineExpose({
+  playlist,          // 暴露响应式 playlist
+  currentIndex,      // 暴露响应式 currentIndex
+  playSongAtIndex    // 暴露播放方法
+})
 </script>
 
-<style>
-body {
-  font-family: 'Arial', sans-serif;
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f0f2f5;
-  color: #333;
-}
-
-.layout {
-  display: flex;
-  gap: 20px;
-  align-items: flex-start;
-}
-
-.right-container {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  gap: 20px;
-  align-items: stretch; /* 新增：让子元素宽度跟右侧容器一致 */
-}
-
-
-/* 现在 player-container 不再控制左右分布，只保留样式 */
+<style scoped>
 .player-container {
   flex: 2 1 auto;
   background-color: #ffffff;
@@ -371,12 +325,6 @@ button {
 button:hover {
   background-color: #489fcc;
 }
-.author-btn {
-  background-color: #f29e4c;
-}
-.author-btn:hover {
-  background-color: #d3863a;
-}
 .song-info {
   margin: 24px 0;
   padding: 16px;
@@ -410,5 +358,4 @@ audio {
 .song-info-container {
   flex: 2 1 auto;
 }
-
 </style>

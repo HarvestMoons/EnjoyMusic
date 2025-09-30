@@ -1,0 +1,67 @@
+<template>
+  <div class="home-page">
+    <div class="layout">
+      <Sidebar />
+
+      <!-- 左侧歌单 -->
+      <Playlist
+          :playlist="playerRef?.playlist"
+          :currentIndex="playerRef?.currentIndex"
+          @select="handlePlaylistClick"
+      />
+
+      <!-- 右侧：播放器 + 频谱 -->
+      <div class="right-container">
+        <Player ref="playerRef" />
+        <SpectrumVisualizer />
+      </div>
+    </div>
+
+    <BackgroundParticles zIndex="0" opacity="0.4" color="0,0,0" :count="99" />
+    <BackgroundRipple apiBase="/api" />
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import Player from '../components/feature/player/Player.vue'
+import Playlist from '../components/feature/player/Playlist.vue'
+import Sidebar from '../components/layout/Sidebar.vue'
+import SpectrumVisualizer from '../components/feature/spectrum/SpectrumVisualizer.vue'
+import BackgroundParticles from '../components/effects/BackgroundParticles.vue'
+import BackgroundRipple from '../components/effects/BackgroundRipple.vue'
+
+const playerRef = ref(null)
+
+// Playlist 点击播放
+function handlePlaylistClick(index) {
+  if (playerRef.value) {
+    playerRef.value.playSongAtIndex(index)
+  }
+}
+</script>
+
+<style scoped>
+.home-page {
+  font-family: 'Arial', sans-serif;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f0f2f5;
+  color: #333;
+}
+
+.layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.right-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 20px;
+  align-items: stretch;
+}
+</style>

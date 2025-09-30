@@ -1,9 +1,10 @@
 // src/main.js
 import { createApp } from 'vue'
 import App from './App.vue'
+import router from "./router/index.js";
 
 const app = createApp(App)
-app.mount('#app')
+app.use(router).mount('#app')
 
 // 推荐在主入口注册 SW（只注册一次）
 if ('serviceWorker' in navigator) {

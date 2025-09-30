@@ -10,6 +10,7 @@
     <!-- 菜单内容（始终存在，用透明度和可见性控制） -->
     <nav class="menu" :class="{ visible: isOpen }">
       <ul>
+        <li><a href="#" @click.prevent="showHome">首页</a></li>
         <li><a href="#" @click.prevent="showPrivacy">隐私政策</a></li>
         <li><a href="#" @click.prevent="showAuthor">🔗关于小蜜蜂</a></li>
       </ul>
@@ -18,16 +19,22 @@
 </template>
 
 <script setup>
-import {ref} from 'vue';
+import {ref} from 'vue'
+import { useRouter } from 'vue-router'
 
-const isOpen = ref(false);
+const isOpen = ref(false)
+const router = useRouter()
 
 function toggleSidebar() {
-  isOpen.value = !isOpen.value;
+  isOpen.value = !isOpen.value
+}
+
+function showHome() {
+  router.push('/')
 }
 
 function showPrivacy() {
-  alert("显示隐私政策内容，可替换为实际组件/路由");
+  router.push('/privacy')
 }
 
 function showAuthor() {
