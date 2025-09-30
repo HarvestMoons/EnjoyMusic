@@ -291,7 +291,7 @@ defineExpose({
 <style scoped>
 .player-container {
   flex: 2 1 auto;
-  background-color: #ffffff;
+  background-color: #fff9d6; /* 浅米黄，和页面背景协调 */
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
@@ -305,16 +305,26 @@ defineExpose({
   justify-content: center;
   margin-top: 15px;
 }
+
 .controls button,
 .controls select {
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid #ccc;
   font-size: 14px;
+  background-color: #fef9e0; /* 按钮浅黄，与容器协调 */
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
+
+.controls button:hover {
+  background-color: #fff176; /* hover柔和黄色 */
+}
+
 button {
   padding: 10px 18px;
-  background-color: #5ab9ea;
+  background-color: #fdd835; /* 主操作按钮温暖黄色 */
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -322,28 +332,33 @@ button {
   font-weight: 500;
   transition: background-color 0.2s ease;
 }
+
 button:hover {
-  background-color: #489fcc;
+  background-color: #fbc02d;
 }
+
 .song-info {
   margin: 24px 0;
   padding: 16px;
-  background-color: #fafafb;
+  background-color: #fffce0; /* 信息卡片浅黄 */
   border-radius: 6px;
   border: 1px solid #e5e8eb;
 }
+
 audio {
   width: 100%;
   margin-top: 12px;
 }
+
 .vote-controls {
   margin-top: 10px;
   display: flex;
   gap: 12px;
   justify-content: flex-start;
 }
+
 .vote-controls button {
-  background-color: #e8f0fe;
+  background-color: #fff8c4; /* 点赞点踩按钮柔和色 */
   color: #333;
   border: 1px solid #ccc;
   border-radius: 6px;
@@ -352,9 +367,11 @@ audio {
   font-size: 14px;
   transition: background-color 0.2s ease;
 }
+
 .vote-controls button:hover {
-  background-color: #cfe0fc;
+  background-color: #fff176;
 }
+
 .song-info-container {
   flex: 2 1 auto;
 }

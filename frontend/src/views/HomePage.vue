@@ -47,7 +47,6 @@ function handlePlaylistClick(index) {
   max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f0f2f5;
   color: #333;
 }
 

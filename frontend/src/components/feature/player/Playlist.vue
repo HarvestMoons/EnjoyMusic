@@ -31,10 +31,10 @@ function getSongTitle(name) {
 
 <style scoped>
 .playlist-container {
-  width: 320px;                 /* 略微增加宽度，更舒适 */
-  background: #fff;             /* 白色背景更清爽 */
-  border-radius: 8px;           /* 圆角 */
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* 轻微阴影 */
+  width: 320px;
+  background: #fff9d6;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   padding: 16px;
   box-sizing: border-box;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -48,9 +48,9 @@ function getSongTitle(name) {
 }
 
 .playlist {
-  max-height: 670px;            /* 保留原有高度限制 */
-  overflow-y: auto;             /* 纵向滚动 */
-  overflow-x: hidden;           /* 禁止横向滚动 */
+  max-height: 670px;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 0;
   margin: 0;
 }
@@ -63,20 +63,21 @@ function getSongTitle(name) {
   border-radius: 6px;
   transition: all 0.2s ease;
   color: #555;
-  background: #fafafa;
-  box-shadow: inset 0 0 0 rgba(0,0,0,0); /* 防止hover闪烁 */
+  background: #fefae0; /* 浅米黄，柔和背景 */
+  box-shadow: inset 0 0 0 rgba(0,0,0,0);
 }
 
 .playlist li:hover {
-  background: #e0f0ff;
+  background: #fff176; /* 柔和黄色，hover高亮 */
   color: #333;
-  transform: translateX(4px);  /* hover微位移增加交互感 */
+  transform: translateX(4px);
 }
 
 .playlist li.active {
-  background: #2196f3;
+  background: #f9a825; /* 温暖橙黄，清晰区分 */
   color: #fff;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+  box-shadow: 0 2px 8px rgba(249, 168, 37, 0.3);
 }
+
 </style>
