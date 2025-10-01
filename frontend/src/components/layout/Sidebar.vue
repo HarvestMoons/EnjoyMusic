@@ -11,6 +11,7 @@
     <nav class="menu" :class="{ visible: isOpen }">
       <ul>
         <li><a href="#" @click.prevent="showHome">首页</a></li>
+        <li><a href="#" @click.prevent="showAbout">关于本站</a></li>
         <li><a href="#" @click.prevent="showPrivacy">隐私政策</a></li>
         <li><a href="#" @click.prevent="showAuthor">🔗关于小蜜蜂</a></li>
       </ul>
@@ -35,6 +36,10 @@ function showHome() {
 
 function showPrivacy() {
   router.push('/privacy')
+}
+
+function showAbout() {
+  router.push('/about')
 }
 
 function showAuthor() {

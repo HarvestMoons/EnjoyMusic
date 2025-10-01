@@ -137,7 +137,7 @@ async function playCachedVideo(selectedVideo, fromCache = false) {
 
     // 监听 overlay 点击实现三次点击退出
     clickCount = 0;
-    const onOverlayClick = (e) => {
+    const onOverlayClick = () => {
       clickCount++;
       if (clickCount >= 3) {
         stopVideoInternal();

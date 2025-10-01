@@ -1,6 +1,6 @@
 <template>
+  <Sidebar />
   <div class="container">
-    <Sidebar />
     <div v-if="loading">
       <MySpinner />
     </div>
