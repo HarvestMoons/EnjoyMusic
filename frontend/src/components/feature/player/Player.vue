@@ -3,10 +3,7 @@
     <div class="song-info-container">
       <div class="song-info">
         <h2 id="current-song">当前未播放</h2>
-        <div class="vote-controls">
-          <button id="like-btn">👍 <span id="like-count">0</span></button>
-          <button id="dislike-btn">👎 <span id="dislike-count">0</span></button>
-        </div>
+        <VoteControls :songId="playlist[currentIndex]?.id" />
         <audio id="audio-player" controls></audio>
       </div>
 
@@ -36,6 +33,7 @@
 <script setup>
 import {onMounted, ref} from 'vue'
 import portalIcon from '@/assets/icons/protal.svg'
+import VoteControls from "./VoteControls.vue";
 
 
 const API_BASE = '/api';
@@ -79,8 +77,6 @@ function setupEventListeners() {
   prevBtn.addEventListener('click', playPreviousSong);
   audioPlayer.addEventListener('ended', handlePlaybackEnd);
   audioPlayer.addEventListener('error', handleAudioError);
-  likeBtn.addEventListener('click', handleLike);
-  dislikeBtn.addEventListener('click', handleDislike);
 }
 
 // ------------------- 歌单与文件夹 -------------------
@@ -171,7 +167,6 @@ function playSongAtIndex(index, fromHistory = false) {
   }
 
   audioPlayer.play();
-  refreshVotes(song.id);
 }
 
 function parseSongNameWithBv(name) {
@@ -234,44 +229,6 @@ function handlePlayClick() {
     playSongAtIndex(next);
   } else {
     playRandomSong();
-  }
-}
-
-// ------------------- 点赞 / 点踩 -------------------
-async function handleLike() {
-  const song = playlist.value[currentIndex.value];
-  if (!song) return;
-  try {
-    const res = await fetch(`${API_BASE}/songs/like/${song.id}`, {method: 'POST'});
-    const data = await res.json();
-    likeCountEl.textContent = data.likes;
-    dislikeCountEl.textContent = data.dislikes;
-  } catch (err) {
-    console.error('点赞失败', err);
-  }
-}
-
-async function handleDislike() {
-  const song = playlist.value[currentIndex.value];
-  if (!song) return;
-  try {
-    const res = await fetch(`${API_BASE}/songs/dislike/${song.id}`, {method: 'POST'});
-    const data = await res.json();
-    likeCountEl.textContent = data.likes;
-    dislikeCountEl.textContent = data.dislikes;
-  } catch (err) {
-    console.error('点踩失败', err);
-  }
-}
-
-async function refreshVotes(songId) {
-  try {
-    const res = await fetch(`${API_BASE}/songs/votes/${songId}`);
-    const data = await res.json();
-    likeCountEl.textContent = data.likes;
-    dislikeCountEl.textContent = data.dislikes;
-  } catch (err) {
-    console.error('获取投票数失败', err);
   }
 }
 
@@ -352,28 +309,6 @@ button:hover {
 audio {
   width: 100%;
   margin-top: 12px;
-}
-
-.vote-controls {
-  margin-top: 10px;
-  display: flex;
-  gap: 12px;
-  justify-content: flex-start;
-}
-
-.vote-controls button {
-  background-color: #fff8c4; /* 点赞点踩按钮柔和色 */
-  color: #333;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 6px 12px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s ease;
-}
-
-.vote-controls button:hover {
-  background-color: #fff176;
 }
 
 .song-info-container {
