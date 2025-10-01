@@ -1,0 +1,29 @@
+html, body, #app {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color:#f1f1b8;
+}
+
+.song-title {
+    font-size: 24px;
+    vertical-align: middle;
+}
+
+.portal-link {
+    margin-left: 20px;
+    display: inline-block;
+}
+
+.portal-icon {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    transition: transform 0.2s ease, filter 0.2s ease;
+    cursor: pointer;
+}
+
+.portal-icon:hover {
+    transform: translateY(-3px) scale(1.1);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}

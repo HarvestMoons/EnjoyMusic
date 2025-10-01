@@ -34,12 +34,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import SpectrumVisualizer from '../spectrum/SpectrumVisualizer.vue'
-import BackgroundParticles from '../../effects/BackgroundParticles.vue'
-import BackgroundRipple from "../../effects/BackgroundRipple.vue";
-import Playlist from './Playlist.vue'
-import Sidebar from "../../layout/Sidebar.vue";
+import {onMounted, ref} from 'vue'
+import portalIcon from '@/assets/icons/protal.svg'
+
 
 const API_BASE = '/api';
 const DEFAULT_FOLDER = 'ha_ji_mi';
@@ -97,8 +94,8 @@ async function setFolder(folder) {
     showLoading(true);
     const res = await fetch(`${API_BASE}/songs/set-folder`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ folder })
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({folder})
     });
     const result = await res.json();
 
@@ -161,7 +158,14 @@ function playSongAtIndex(index, fromHistory = false) {
   audioPlayer.src = song.url;
   const parsed = parseSongNameWithBv(song.name);
   if (parsed.bv) {
-    currentSongEl.innerHTML = `${parsed.title} <a href="https://www.bilibili.com/video/${parsed.bv}/" target="_blank" style="font-size:14px;color:#007bff;">[叽里咕噜说啥呢]</a>`;
+    currentSongEl.innerHTML = `
+  <span class="song-title">${parsed.title}</span>
+  <a href="https://www.bilibili.com/video/${parsed.bv}/" target="_blank" class="portal-link">
+    <img src="${portalIcon}" alt="传送门" class="portal-icon" />
+  </a>
+`
+
+
   } else {
     currentSongEl.textContent = parsed.title;
   }
@@ -173,7 +177,7 @@ function playSongAtIndex(index, fromHistory = false) {
 function parseSongNameWithBv(name) {
   const clean = name.replace(/\.mp3$/, '');
   const match = clean.match(/^(.*?)_?(BV[0-9A-Za-z]+)/);
-  return match ? { title: match[1], bv: match[2] } : { title: clean, bv: null };
+  return match ? {title: match[1], bv: match[2]} : {title: clean, bv: null};
 }
 
 function playPreviousSong() {
@@ -238,7 +242,7 @@ async function handleLike() {
   const song = playlist.value[currentIndex.value];
   if (!song) return;
   try {
-    const res = await fetch(`${API_BASE}/songs/like/${song.id}`, { method: 'POST' });
+    const res = await fetch(`${API_BASE}/songs/like/${song.id}`, {method: 'POST'});
     const data = await res.json();
     likeCountEl.textContent = data.likes;
     dislikeCountEl.textContent = data.dislikes;
@@ -251,7 +255,7 @@ async function handleDislike() {
   const song = playlist.value[currentIndex.value];
   if (!song) return;
   try {
-    const res = await fetch(`${API_BASE}/songs/dislike/${song.id}`, { method: 'POST' });
+    const res = await fetch(`${API_BASE}/songs/dislike/${song.id}`, {method: 'POST'});
     const data = await res.json();
     likeCountEl.textContent = data.likes;
     dislikeCountEl.textContent = data.dislikes;
@@ -375,4 +379,5 @@ audio {
 .song-info-container {
   flex: 2 1 auto;
 }
+
 </style>
