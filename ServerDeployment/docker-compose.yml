@@ -1,0 +1,49 @@
+version: '3.9'
+
+services:
+  spring:
+    image: beecool/music-player:latest
+    container_name: spring_app
+    restart: always
+    ports:
+      - "8082:8082"
+    depends_on:
+      - redis
+    networks:
+      - app-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    # 每次部署前拉取最新镜像
+    deploy:
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+  frontend:
+    image: beecool/music-player-frontend:latest
+    container_name: nginx_frontend
+    restart: always
+    ports:
+      - "8081:80"
+    depends_on:
+      - spring
+    networks:
+      - app-network
+
+  redis:
+    image: redis:6.2
+    container_name: redis_server
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+
+volumes:
+  redis_data:
+
+networks:
+  app-network:
+    driver: bridge
