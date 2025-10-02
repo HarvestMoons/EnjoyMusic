@@ -3,7 +3,11 @@
     <div class="song-info-container">
       <div class="song-info">
         <h2 id="current-song">当前未播放</h2>
-        <VoteControls :songId="playlist[currentIndex]?.id" />
+        <Playlist
+            :playlist="playlist"
+            :currentSongId="playlist[currentIndex]?.id"
+            @select="handleSelectSong"
+        />
         <audio id="audio-player" controls></audio>
       </div>
 
@@ -232,6 +236,14 @@ function handlePlayClick() {
   }
 }
 
+// 已暴露的 playSongAtIndex 方法
+function handleSelectSong(songId) {
+  const idx = playlist.value.findIndex(s => s.id === songId)
+  if (idx !== -1) {
+    playSongAtIndex(idx)
+  }
+}
+
 // ------------------- 工具 -------------------
 function showLoading(show) {
   document.body.classList.toggle('loading', show);
@@ -245,7 +257,8 @@ onMounted(() => {
 defineExpose({
   playlist,          // 暴露响应式 playlist
   currentIndex,      // 暴露响应式 currentIndex
-  playSongAtIndex    // 暴露播放方法
+  playSongAtIndex,    // 暴露播放方法
+  handleSelectSong
 })
 </script>
 

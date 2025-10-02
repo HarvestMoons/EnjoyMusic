@@ -6,7 +6,7 @@
       <!-- 左侧歌单 -->
       <Playlist
           :playlist="playerRef?.playlist"
-          :currentIndex="playerRef?.currentIndex"
+          :currentSongId="playerRef?.playlist[playerRef?.currentIndex]?.id"
           @select="handlePlaylistClick"
       />
 
@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import {ref} from 'vue'
 import Player from '../components/feature/player/Player.vue'
 import Playlist from '../components/feature/player/Playlist.vue'
 import Sidebar from '../components/layout/Sidebar.vue'
@@ -34,9 +34,9 @@ import BackgroundRipple from '../components/effects/BackgroundRipple.vue'
 const playerRef = ref(null)
 
 // Playlist 点击播放
-function handlePlaylistClick(index) {
+function handlePlaylistClick(songId) {
   if (playerRef.value) {
-    playerRef.value.playSongAtIndex(index)
+    playerRef.value.handleSelectSong(songId)  // 通过 song.id 找索引播放
   }
 }
 </script>
